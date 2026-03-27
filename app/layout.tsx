@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-slate-900 text-slate-50 antialiased">
         <LangProvider>
           {/* Fixed language switcher — top right on every page */}
-          <div className="fixed top-4 right-4 z-50">
+          <div className="fixed top-3 right-3 z-[9999]">
             <LangSwitcher />
           </div>
           {children}

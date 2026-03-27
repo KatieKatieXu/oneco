@@ -42,8 +42,7 @@ export default function QuizPage() {
           setAnimating(false);
         }, 200);
       } else {
-        const { profile } = calculateResult(newAnswers);
-        const startupScore = calculateResult(newAnswers).startupScore;
+        const { profile, startupScore } = calculateResult(newAnswers);
         router.push(`/result/${profile}?startup=${startupScore}`);
       }
     }, 300);
@@ -71,8 +70,8 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col">
-      {/* Top bar */}
-      <div className="px-4 pt-6 pb-4 flex-shrink-0">
+      {/* Top bar — pushed down to avoid overlap with language switcher on mobile */}
+      <div className="px-4 pt-14 pb-4 flex-shrink-0">
         <div className="flex items-center gap-3 max-w-lg mx-auto mb-4">
           <button
             onClick={handleBack}
@@ -123,7 +122,7 @@ export default function QuizPage() {
                 <button
                   key={idx}
                   onClick={() => handleAnswer(idx)}
-                  className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-150 flex items-center gap-4 group active:scale-98 ${
+                  className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-150 flex items-center gap-4 group active:scale-[0.98] ${
                     isSelected
                       ? "bg-violet-600 border-violet-500 text-white shadow-lg shadow-violet-500/20"
                       : "bg-slate-800/60 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-violet-500/40 hover:text-white"
@@ -143,6 +142,8 @@ export default function QuizPage() {
               );
             })}
           </div>
+
+
         </div>
       </div>
     </div>

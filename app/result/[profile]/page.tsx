@@ -33,7 +33,7 @@ export default function ResultPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-violet-900/30 to-transparent pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-2xl mx-auto px-4 pt-12 pb-8 text-center">
+        <div className="relative z-10 max-w-2xl mx-auto px-4 pt-20 pb-8 text-center">
           <p className="text-violet-400 text-sm font-semibold uppercase tracking-widest mb-4">
             {t(RESULT_T.talent_profile_label, lang)}
           </p>

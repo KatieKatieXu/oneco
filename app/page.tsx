@@ -44,7 +44,7 @@ export default function Home() {
         {/* CTA */}
         <Link
           href="/quiz"
-          className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-semibold px-8 py-4 rounded-2xl text-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-violet-500/25 active:scale-95"
+          className="relative z-20 inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-semibold px-8 py-4 rounded-2xl text-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-violet-500/25 active:scale-95"
         >
           {t(LANDING_T.cta, lang)}
         </Link>
