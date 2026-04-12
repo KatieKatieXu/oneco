@@ -260,6 +260,7 @@ export const PROFILES: Record<ProfileKey, Profile> = {
 export function calculateResult(answers: (number | null)[]): {
   profile: ProfileKey;
   startupScore: number;
+  scores: Record<ProfileKey, number>;
 } {
   const scores: Record<ProfileKey, number> = {
     visionary: 0,
@@ -283,7 +284,7 @@ export function calculateResult(answers: (number | null)[]): {
   });
 
   const profile = (Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0]) as ProfileKey;
-  return { profile, startupScore };
+  return { profile, startupScore, scores };
 }
 
 export function getStartupReadiness(score: number): {

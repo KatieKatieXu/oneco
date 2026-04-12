@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { QUESTIONS, calculateResult } from "@/lib/quiz-data";
 import { QUESTIONS_I18N, QUIZ_T, t } from "@/lib/i18n";
 import { useLang } from "@/components/LangProvider";
+import { saveQuizResult } from "@/lib/tracking";
 
 export default function QuizPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function QuizPage() {
   const [selected, setSelected] = useState<number | null>(null);
   const [direction, setDirection] = useState<"right" | "left">("right");
   const [animating, setAnimating] = useState(false);
+  const quizStartTime = useRef(Date.now());
 
   const question = QUESTIONS[currentQ];
   const questionI18N = QUESTIONS_I18N[currentQ];
@@ -42,7 +44,19 @@ export default function QuizPage() {
           setAnimating(false);
         }, 200);
       } else {
-        const { profile, startupScore } = calculateResult(newAnswers);
+        const { profile, startupScore, scores } = calculateResult(newAnswers);
+
+        // Track quiz result to Supabase
+        const durationSeconds = Math.round((Date.now() - quizStartTime.current) / 1000);
+        saveQuizResult({
+          answers: newAnswers,
+          profile,
+          scores,
+          startupScore,
+          lang,
+          durationSeconds,
+        });
+
         router.push(`/result/${profile}?startup=${startupScore}`);
       }
     }, 300);
