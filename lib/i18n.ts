@@ -258,10 +258,10 @@ export const RESULT_T = {
     fr: "Nous construisons Jobpilot exactement pour ça",
   },
   find_ideal_job: {
-    en: "Find your ideal job →",
-    zh: "找到你的理想工作 →",
-    es: "Encuentra tu trabajo ideal →",
-    fr: "Trouvez votre emploi idéal →",
+    en: "See how we match your best-fit role →",
+    zh: "去看看我们匹配最优岗位的逻辑 →",
+    es: "Descubre cómo encontramos tu puesto ideal →",
+    fr: "Découvrez comment on trouve votre poste idéal →",
   },
   retake: {
     en: "Retake the quiz",

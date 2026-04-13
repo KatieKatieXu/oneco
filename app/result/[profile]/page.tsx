@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams, notFound } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import Link from "next/link";
 import { PROFILES, getStartupReadiness, type ProfileKey } from "@/lib/quiz-data";
 import { RESULT_T, TUNNEL_LABELS, PROFILE_NAMES, PROFILES_I18N, t } from "@/lib/i18n";
@@ -10,18 +10,16 @@ import ShareCard from "./ShareCard";
 
 export default function ResultPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const { lang } = useLang();
 
   const profileKey = params.profile as string;
-  const startupScore = parseInt(searchParams.get("startup") || "0");
 
   if (!PROFILES[profileKey as ProfileKey]) {
-    return null; // notFound() can't be called in client component directly; we handle below
+    return null;
   }
 
   const profile = PROFILES[profileKey as ProfileKey];
-  const readiness = getStartupReadiness(startupScore);
+  const readiness = getStartupReadiness(profileKey as ProfileKey);
   const tunnelLabels = TUNNEL_LABELS[lang];
   const profileName = PROFILE_NAMES[profileKey]?.[lang] ?? profile.name;
   const pi18n = PROFILES_I18N[profileKey];
@@ -52,18 +50,15 @@ export default function ResultPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-semibold">{t(RESULT_T.startup_readiness, lang)}</h2>
             <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
-              startupScore >= 3 ? 'bg-violet-500/20 text-violet-300' :
-              startupScore >= 1 ? 'bg-indigo-500/20 text-indigo-300' :
-              'bg-slate-600/40 text-slate-400'
+              readiness.level >= 4 ? 'bg-violet-500/20 text-violet-300' :
+              'bg-indigo-500/20 text-indigo-300'
             }`}>{readiness.label}</span>
           </div>
 
           {/* Volume tunnel — 5 bars growing in size like an audio equalizer */}
           <div className="flex items-end justify-center gap-1.5 h-16 mb-4">
             {[1, 2, 3, 4, 5].map((level) => {
-              const filled = startupScore >= 3 ? level <= 5 :
-                             startupScore >= 1 ? level <= 3 :
-                             level <= 1;
+              const filled = level <= readiness.level;
               const heights = ['h-4', 'h-6', 'h-9', 'h-12', 'h-16'];
               const widths = ['w-6', 'w-7', 'w-8', 'w-9', 'w-10'];
               return (
@@ -71,11 +66,9 @@ export default function ResultPage() {
                   key={level}
                   className={`${heights[level-1]} ${widths[level-1]} rounded-sm transition-all duration-700 ${
                     filled
-                      ? startupScore >= 3
+                      ? readiness.level >= 4
                         ? 'bg-violet-500 shadow-lg shadow-violet-500/30'
-                        : startupScore >= 1
-                        ? 'bg-indigo-400 shadow-lg shadow-indigo-500/20'
-                        : 'bg-slate-500'
+                        : 'bg-indigo-400 shadow-lg shadow-indigo-500/20'
                       : 'bg-slate-700/50'
                   }`}
                   style={{ transitionDelay: `${(level - 1) * 80}ms` }}
@@ -136,74 +129,27 @@ export default function ResultPage() {
           </div>
         </div>
 
-        {/* AI + One-Person Company advice */}
-        <div className="bg-gradient-to-br from-slate-800/80 to-violet-900/20 border border-violet-500/20 rounded-2xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-xl">🤖</span>
-            <h3 className="text-white font-semibold text-sm">
-              {{
-                en: "The One-Person Company runs on AI",
-                zh: "一人公司的核心武器：AI",
-                es: "La empresa unipersonal funciona con IA",
-                fr: "L'entreprise individuelle fonctionne avec l'IA",
-              }[lang]}
-            </h3>
-          </div>
-          <p className="text-slate-300 text-sm leading-relaxed mb-4">
-            {{
-              en: "One-person companies don't scale by working harder — they scale by thinking clearer. AI agents handle execution. Your job is to ask the right questions, articulate the goal, and sort your thoughts into direction. The quality of your thinking is your highest-leverage skill.",
-              zh: "一人公司不靠拼命工作来扩展规模——而是靠更清晰的思考。AI agent负责执行，你的工作是提出正确问题、清晰表达目标、把想法整理成方向。你的思维质量，是你最高杠杆的竞争力。",
-              es: "Las empresas unipersonales no escalan trabajando más duro — escalan pensando con más claridad. Los agentes de IA manejan la ejecución. Tu trabajo es hacer las preguntas correctas, articular el objetivo y ordenar tus pensamientos en dirección. La calidad de tu pensamiento es tu habilidad de mayor apalancamiento.",
-              fr: "Les entreprises individuelles ne grandissent pas en travaillant plus dur — elles grandissent en pensant plus clairement. Les agents IA s'occupent de l'exécution. Votre travail consiste à poser les bonnes questions, articuler l'objectif et organiser vos pensées en direction. La qualité de votre réflexion est votre compétence à plus fort levier.",
-            }[lang]}
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {([
-              {
-                icon: "💬",
-                en: "How you ask matters", zh: "提问方式决定成败",
-                es: "Cómo preguntas importa", fr: "Comment vous demandez compte",
-              },
-              {
-                icon: "🧠",
-                en: "Sort thoughts first", zh: "先整理思路",
-                es: "Ordena tus ideas primero", fr: "Triez vos idées d'abord",
-              },
-              {
-                icon: "⚡",
-                en: "AI executes, you direct", zh: "AI执行，你掌舵",
-                es: "IA ejecuta, tú diriges", fr: "L'IA exécute, vous dirigez",
-              },
-            ] as const).map((item) => (
-              <div key={item.icon} className="bg-slate-800/60 rounded-xl p-3 text-center">
-                <div className="text-xl mb-1">{item.icon}</div>
-                <p className="text-slate-300 text-[10px] leading-tight">{item[lang]}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Jobpilot CTA */}
         <div className="bg-gradient-to-br from-violet-900/40 to-indigo-900/40 border border-violet-500/30 rounded-2xl p-6 text-center">
           <div className="text-3xl mb-3">✈️</div>
           <h3 className="text-white font-semibold mb-2">
             {{
-              en: "Find your highest-value job first",
-              zh: "先找到你最高价值的工作",
-              es: "Encuentra primero tu trabajo de mayor valor",
-              fr: "Trouvez d'abord votre emploi à plus haute valeur",
+              en: "Maximize your cash flow — start by converting your hard skills",
+              zh: "最大化你的现金流——从转化硬技能开始",
+              es: "Maximiza tu flujo de caja — empieza convirtiendo tus habilidades",
+              fr: "Maximisez votre cash flow — commencez par convertir vos compétences",
             }[lang]}
           </h3>
           <p className="text-slate-300 text-sm leading-relaxed mb-4">
             {{
-              en: "Tell us your talent and we'll combine it with your expertise to find the highest-value job on the market — and be the first to let you know.",
-              zh: "告诉我们你的天赋，我们将结合你的专业能力，为你找到市场上最高价值的工作——并第一时间通知你。",
-              es: "Cuéntanos tu talento y lo combinaremos con tu experiencia para encontrar el trabajo de mayor valor del mercado — y ser los primeros en avisarte.",
-              fr: "Dites-nous votre talent et nous le combinerons avec votre expertise pour trouver le travail à plus haute valeur du marché — et vous le faire savoir en premier.",
+              en: "Tell Jobpilot your expertise and unique talents. We'll help you refine your materials and walk with you until you land the highest-value job that truly fits who you are.",
+              zh: "告诉 Jobpilot 你的专业能力和天赋兴趣，我们将陪跑你优化材料，直到你找到市场上最符合你个人特色的最高价值工作。",
+              es: "Cuéntale a Jobpilot tu experiencia y talentos únicos. Te acompañaremos a optimizar tus materiales hasta que encuentres el trabajo de mayor valor que realmente se ajuste a ti.",
+              fr: "Parlez à Jobpilot de votre expertise et de vos talents uniques. Nous vous accompagnerons pour optimiser vos documents jusqu'à ce que vous trouviez le poste à plus haute valeur qui vous correspond vraiment.",
             }[lang]}
           </p>
           <a
-            href="http://localhost:3001"
+            href="https://jobpilot.katexu.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-violet-500/20 text-sm"

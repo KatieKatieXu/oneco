@@ -16,16 +16,18 @@ export interface Question {
 export const QUESTIONS: Question[] = [
   {
     id: 1,
+    // Q1: "Start building immediately" = executor mindset → startup point
     text: "When you have a new idea, you...",
     answers: [
       { label: "A", text: "Research everything first", profile: "expert" },
       { label: "B", text: "Tell everyone about it", profile: "connector" },
-      { label: "C", text: "Start building immediately", profile: "executor", isStartupPoint: true },
+      { label: "C", text: "Start building immediately", profile: "executor" },
       { label: "D", text: "Write a detailed plan", profile: "visionary" },
     ],
   },
   {
     id: 2,
+    // Q2: "Too many rules" = chafes under authority → solo-ready
     text: "Your biggest energy drain is...",
     answers: [
       { label: "A", text: "Repetitive tasks", profile: "visionary" },
@@ -36,6 +38,7 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 3,
+    // Q3: "Data and research" = expert who validates before acting → smart solo founder
     text: "You make decisions by...",
     answers: [
       { label: "A", text: "Gut feeling", profile: "creative" },
@@ -46,6 +49,7 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 4,
+    // Q4: no startup point — this measures team role, not solo aptitude
     text: "In a group project you naturally become...",
     answers: [
       { label: "A", text: "The idea person", profile: "visionary" },
@@ -56,9 +60,10 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 5,
+    // Q5: "Excited by uncertainty" = visionary risk tolerance → startup point
     text: "Uncertainty makes you feel...",
     answers: [
-      { label: "A", text: "Excited — more possibilities!", profile: "visionary", isStartupPoint: true },
+      { label: "A", text: "Excited — more possibilities!", profile: "visionary" },
       { label: "B", text: "Anxious but I push through", profile: "executor" },
       { label: "C", text: "I need to reduce it fast", profile: "expert" },
       { label: "D", text: "Paralyzed until I have more info", profile: "creative" },
@@ -66,6 +71,7 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 6,
+    // Q6: "Beautifully crafted" = creative who can sell craft solo → startup point
     text: "You're most proud of work that...",
     answers: [
       { label: "A", text: "Changed how people think", profile: "visionary" },
@@ -76,9 +82,10 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 7,
+    // Q7: "Money follows great work" = creative confidence; "Bet big" = executor conviction
     text: "Your relationship with money/risk...",
     answers: [
-      { label: "A", text: "Money follows great work", profile: "creative", isStartupPoint: true },
+      { label: "A", text: "Money follows great work", profile: "creative" },
       { label: "B", text: "I need stability before I take risks", profile: "expert" },
       { label: "C", text: "Calculated risks only", profile: "visionary" },
       { label: "D", text: "I'll bet big if I believe in it", profile: "executor" },
@@ -86,9 +93,10 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 8,
+    // Q8: "Set your own rules" = self-directed → startup point
     text: "You work best when...",
     answers: [
-      { label: "A", text: "You set your own rules", profile: "executor", isStartupPoint: true },
+      { label: "A", text: "You set your own rules", profile: "executor" },
       { label: "B", text: "There's a clear structure", profile: "expert" },
       { label: "C", text: "You're collaborating", profile: "connector" },
       { label: "D", text: "You have deep focus time", profile: "creative" },
@@ -96,6 +104,7 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 9,
+    // Q9: no startup point — this measures strength type, not solo aptitude
     text: "Your superpower is...",
     answers: [
       { label: "A", text: "Seeing patterns others miss", profile: "visionary" },
@@ -106,6 +115,7 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 10,
+    // Q10: "Free" = wants autonomy → strongest solo signal
     text: "In 5 years you want to feel...",
     answers: [
       { label: "A", text: "Free", profile: "executor" },
@@ -259,7 +269,6 @@ export const PROFILES: Record<ProfileKey, Profile> = {
 
 export function calculateResult(answers: (number | null)[]): {
   profile: ProfileKey;
-  startupScore: number;
   scores: Record<ProfileKey, number>;
 } {
   const scores: Record<ProfileKey, number> = {
@@ -270,49 +279,69 @@ export function calculateResult(answers: (number | null)[]): {
     creative: 0,
   };
 
-  let startupScore = 0;
-  const startupQuestions = [0, 4, 6, 7]; // Q1, Q5, Q7, Q8 (0-indexed)
-
   answers.forEach((answerIndex, questionIndex) => {
     if (answerIndex === null) return;
     const question = QUESTIONS[questionIndex];
     const answer = question.answers[answerIndex];
     scores[answer.profile]++;
-    if (startupQuestions.includes(questionIndex) && answer.isStartupPoint) {
-      startupScore++;
-    }
   });
 
   const profile = (Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0]) as ProfileKey;
-  return { profile, startupScore, scores };
+  return { profile, scores };
 }
 
-export function getStartupReadiness(score: number): {
+/**
+ * Startup readiness is determined directly by profile type.
+ *
+ * executor  → 5 bars (highest) — self-directed builder, ships independently
+ * expert    → 4 bars — deep skill monetizable solo: consulting, courses, SaaS
+ * creative  → 4 bars — personal brand, content, design — natural solo path
+ * visionary → 3 bars — spots opportunities, but may need team for sustained execution
+ * connector → 3 bars — community monetization works, but strengths are people-dependent
+ */
+const PROFILE_READINESS: Record<ProfileKey, {
+  level: number;       // 1-5, maps to volume bars
   label: string;
   sublabel: string;
   color: string;
-  width: string;
+}> = {
+  executor: {
+    level: 5,
+    label: "One-Person Company material",
+    sublabel: "You ship fast, set your own rules, and turn chaos into systems. One-person company is your natural path.",
+    color: "bg-violet-500",
+  },
+  expert: {
+    level: 4,
+    label: "High solo potential",
+    sublabel: "Your deep expertise is directly monetizable — consulting, courses, or niche SaaS. Depth is your moat.",
+    color: "bg-violet-500",
+  },
+  creative: {
+    level: 4,
+    label: "High solo potential",
+    sublabel: "Your craft is your product. Build in public, grow an audience, and let the business model follow.",
+    color: "bg-violet-500",
+  },
+  visionary: {
+    level: 3,
+    label: "Make cash flow on the side",
+    sublabel: "You see opportunities others miss. Pair your vision with a side project to validate before going all in.",
+    color: "bg-indigo-500",
+  },
+  connector: {
+    level: 3,
+    label: "Make cash flow on the side",
+    sublabel: "Your network is powerful. Build a community or audience first — monetization follows trust.",
+    color: "bg-indigo-500",
+  },
+};
+
+export function getStartupReadiness(profile: ProfileKey): {
+  level: number;
+  label: string;
+  sublabel: string;
+  color: string;
 } {
-  if (score >= 3) {
-    return {
-      label: "One-Person Company material",
-      sublabel: "You think in ideas, execute fast, and turn thoughts into action. One-person company is your path.",
-      color: "bg-violet-500",
-      width: "w-full",
-    };
-  } else if (score >= 1) {
-    return {
-      label: "Make cash flow on the side",
-      sublabel: "Get paid, gain experience, then launch your one-person company — or run both at the same time.",
-      color: "bg-indigo-500",
-      width: "w-2/3",
-    };
-  } else {
-    return {
-      label: "Build your foundation first",
-      sublabel: "Find the right team, gain the skills, collect your ideas — your one-person company story is just beginning.",
-      color: "bg-blue-500",
-      width: "w-1/3",
-    };
-  }
+  return PROFILE_READINESS[profile];
 }

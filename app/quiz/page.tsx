@@ -44,7 +44,7 @@ export default function QuizPage() {
           setAnimating(false);
         }, 200);
       } else {
-        const { profile, startupScore, scores } = calculateResult(newAnswers);
+        const { profile, scores } = calculateResult(newAnswers);
 
         // Track quiz result to Supabase
         const durationSeconds = Math.round((Date.now() - quizStartTime.current) / 1000);
@@ -52,12 +52,12 @@ export default function QuizPage() {
           answers: newAnswers,
           profile,
           scores,
-          startupScore,
+          startupScore: 0, // deprecated — readiness now derived from profile type
           lang,
           durationSeconds,
         });
 
-        router.push(`/result/${profile}?startup=${startupScore}`);
+        router.push(`/result/${profile}`);
       }
     }, 300);
   };
